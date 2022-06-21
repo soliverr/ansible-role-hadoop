@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+
+<!--
+{{ ansible_managed|comment }}
+-->
+
+<configuration>
+{% for entry in (hadoop_properties['mapred-site'] | dict2items)  %}
+    <property>
+        <name>{{ entry.key }}</name>
+        <value>{{ entry.value }}</value>
+    </property>
+{% endfor %}
+</configuration>

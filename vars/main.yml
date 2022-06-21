@@ -1,0 +1,11 @@
+---
+# vars file for ansible-role-hadoop
+
+# Common system packages
+hadoop_system_dependencies:
+  - gzip
+  - tar
+
+# Installation URL
+hadoop_package_name: "hadoop-{{ hadoop_version }}.tar.gz"
+hadoop_url: "{{ hadoop_mirror }}/hadoop/common/hadoop-{{ hadoop_version }}/{{ hadoop_package_name }}"

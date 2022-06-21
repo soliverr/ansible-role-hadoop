@@ -1,0 +1,10 @@
+{{ ansible_managed|comment }}
+
+# Source HADOOP environment
+. {{ hadoop_etc_base_dir }}/conf/yarn-env.sh
+
+HADOOP_YARN_HOME="${HADOOP_YARN_HOME:-$HADOOP_HOME}"
+export HADOOP_YARN_HOME
+
+# Set up system PATH
+[[ "$PATH" =~ (^|:)"$HADOOP_YARN_HOME/bin"(|/)(:|$) ]] || PATH=$HADOOP_YARN_HOME/bin:$PATH

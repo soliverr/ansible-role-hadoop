@@ -1,0 +1,23 @@
+{{ ansible_managed|comment }}
+
+{% if hadoop_service_name|length > 0 %}
+  {% set _env_path = hadoop_etc_base_dir + '/%i' %}
+{% else %}
+  {% set _env_path = hadoop_etc_dir %}
+{% endif %}
+
+[Unit]
+Description=Hadoop YARN Service for version {{ hadoop_version }}
+After=network.target
+
+[Service]
+User={{ yarn_user }}
+Group={{ hadoop_group }}
+EnvironmentFile={{ _env_path }}/yarn-env.sh
+Type=forking
+SuccessExitStatus=143
+ExecStart={{ hadoop_install_dir }}/bin/yarn --config "{{ _env_path }}" --daemon start {{ item }}
+ExecStop={{ hadoop_install_dir }}/bin/yarn --config "{{ _env_path }}" --daemon stop {{ item }}
+
+[Install]
+WantedBy=multi-user.target

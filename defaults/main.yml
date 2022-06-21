@@ -1,0 +1,174 @@
+---
+# defaults file for ansible-role-hadoop
+
+# Version
+hadoop_version: '3.3.3'
+
+# -----------------------------------------------------------------------------
+# Using proxy
+use_proxy: false
+# Mirror to download binary distribution
+hadoop_mirror: "http://artfiles.org/apache.org"
+
+# Hadoop services can be named to use various configuration for one site
+hadoop_service_name: ""
+
+# -----------------------------------------------------------------------------
+# Hadoop service type for node:
+# - local
+# HDFS:
+# - namenode
+# - datanode
+# - secondarynamenode
+# - standbynode
+# - journalnode
+# - zkfc
+# YARN:
+# - resourcemanager
+# - nodemanager
+# - timelineserver
+hadoop_service_type:
+ - local
+
+# -----------------------------------------------------------------------------
+# Internal version if service name is supplied
+_hadoop_version: "{{ hadoop_service_name if (hadoop_service_name|length > 0) else hadoop_version }}"
+# Internal service name
+_hadoop_service_name: "{{ '@' + hadoop_service_name if (hadoop_service_name|length > 0) else '' }}"
+
+# -----------------------------------------------------------------------------
+# User/group management
+# Hadoop super user and group
+hadoop_user: hadoop
+hadoop_group: hadoop
+# User for HDFS service
+hdfs_user: hdfs
+hdfs_group: hdfs
+# User for YARN service
+yarn_user: yarn
+yarn_group: yarn
+# Create users for service
+hadoop_user_create: true
+hdfs_user_create: true
+yarn_user_create: true
+
+# -----------------------------------------------------------------------------
+# Profile name to put into `/etc/profile.d`
+hadoop_profile_name: "hadoop.sh"
+# Environment name
+hadoop_env_name: "hadoop-env.sh"
+
+# HDFS Service
+#
+# Start on boot
+hdfs_service_enabled: false
+# Current state: started, stopped
+hdfs_service_state: stopped
+# WARN. You can lose all your hdfs data.
+force_format_hdfs: false
+# Set this named service as system default
+hdfs_service_set_default: false
+#
+# Files & Paths
+hadoop_etc_base_dir: "/etc/hadoop"
+hadoop_etc_dir: "{{ hadoop_etc_base_dir }}/{{ _hadoop_version }}"
+hadoop_log_dir: "/var/log/hadoop/{{ _hadoop_version }}"
+hadoop_base_dir: "/opt/hadoop"
+hadoop_install_dir: "{{ hadoop_base_dir }}/{{ hadoop_version }}"
+hadoop_aux_dir: "/opt/hadoop-aux-libs"
+#
+# Sevices paths
+hdfs_namenode_dir: "/var/lib/hdfs/namenode"
+hdfs_journalnode_dir: "/var/lib/hdfs/journalnode"
+hdfs_checkpoint_dir: "/var/lib/hdfs/namesecondary"
+hdfs_log_dir: "{{ hadoop_log_dir }}/hdfs"
+
+
+# -----------------------------------------------------------------------------
+# YARN Service
+#
+# Start on boot
+yarn_service_enabled: false
+# Current state: started, stopped
+yarn_service_state: stopped
+# Set this service as system default
+yarn_service_set_default: false
+#
+# Files & Paths
+yarn_log_dir: "{{ hadoop_log_dir }}/yarn"
+yarn_local_dir: "/var/lib/yarn/{{ _hadoop_version }}"
+
+# Control common default
+_hadoop_service_set_default: "{{ true if (hdfs_service_set_default or yarn_service_set_default) else false }}"
+
+# -----------------------------------------------------------------------------
+# Setup default configuration
+# 
+# A dictionary with a set of properties to set in the hadoop core services
+default_hadoop_properties:
+ core-site: {}
+
+ hdfs-site: {}
+
+ hdfs-env:
+  JAVA_HOME: "{{ java_home | default(omit) }}"
+  HADOOP_LOG_DIR: "{{ hdfs_log_dir }}"
+  HADOOP_CONF_DIR: "{{ hadoop_etc_dir }}"
+  HADOOP_HOME: "{{ hadoop_install_dir }}"
+
+ mapred-site:
+  mapreduce.job.queuename: "default"
+
+ yarn-site:
+  ## Web UI
+  yarn.webapp.ui2.enable: "true"
+  # NodeManager
+  yarn.nodemanager.env-whitelist: "JAVA_HOME,HADOOP_CONF_DIR,HADOOP_COMMON_HOME,HADOOP_HDFS_HOME,HADOOP_YARN_HOME,HADOOP_MAPRED_HOME"
+  # Logs
+  yarn.log-aggregation-enable: "true"
+  yarn.nodemanager.log-dirs: "{{ yarn_log_dir }}"
+  yarn.nodemanager.log.retain-seconds: 2592000
+  yarn.nodemanager.remote-app-log-dir: "/yarn-app-logs"
+  yarn.nodemanager.remote-app-log-dir-suffix: "logs"
+  yarn.nodemanager.log-aggregation.compression-type: "gz"
+  yarn.nodemanager.log-aggregation.num-log-files-per-app: 32
+  yarn.nodemanager.log-aggregation.roll-monitoring-interval-seconds: 3600
+  # Memory check
+  yarn.nodemanager.pmem-check-enabled: "true"
+  yarn.nodemanager.vmem-check-enabled: "true"
+  # Hardware resources
+  yarn.nodemanager.resource.detect-hardware-capabilities: "true"
+  yarn.nodemanager.resource.cpu-vcores: -1
+  yarn.nodemanager.resource.memory-mb: -1
+  yarn.nodemanager.resource.system-reserved-memory-mb: -1
+  yarn.nodemanager.vmem-pmem-ratio: 2.4
+  # Scheduler
+  yarn.resourcemanager.scheduler.class: "org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler"
+
+ yarn-env:
+  JAVA_HOME: "{{ java_home | default(omit) }}"
+  HADOOP_YARN_HOME: "{{ hadoop_install_dir }}"
+  HADOOP_LOG_DIR: "{{ yarn_log_dir }}"
+  HADOOP_HOME: "{{ hadoop_install_dir }}"
+  HADOOP_CONF_DIR: "{{ hadoop_etc_dir }}"
+
+ capacity-scheduler:
+  yarn.scheduler.capacity.schedule-asynchronously.enable: "true"
+  yarn.scheduler.capacity.schedule-asynchronously.maximum-threads: 1
+  yarn.scheduler.capacity.schedule-asynchronously.scheduling-interval-ms: 10
+  yarn.scheduler.capacity.maximum-am-resource-percent: 0.2
+  yarn.scheduler.capacity.maximum-applications: 1000
+  yarn.scheduler.capacity.node-locality-delay: 40
+  # root queue
+  yarn.scheduler.capacity.root.capacity: 100
+  yarn.scheduler.capacity.root.queues: "default"
+  yarn.scheduler.capacity.root.accessible-node-labels: "*"
+  yarn.scheduler.capacity.root.acl_administer_queue: "*"
+  yarn.scheduler.capacity.root.acl_submit_applications: "*"
+  # default queue
+  yarn.scheduler.capacity.root.default.capacity: 100
+  yarn.scheduler.capacity.root.default.maximum-capacity: 100
+  yarn.scheduler.capacity.root.default.state: 'RUNNING'
+  yarn.scheduler.capacity.root.default.user-limit-factor: 1
+  yarn.scheduler.capacity.root.default.acl_administer_jobs: "*"
+  yarn.scheduler.capacity.root.default.acl_submit_applications: "*"

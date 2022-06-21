@@ -1,0 +1,5 @@
+{% if 'datanodes' in groups %}
+{% for host in groups['datanodes'] %}
+{{ host }}
+{% endfor %}
+{% endif %}

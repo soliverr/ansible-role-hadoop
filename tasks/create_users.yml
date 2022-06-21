@@ -1,0 +1,41 @@
+---
+
+- name: "USERS and GROUPS| Ensure HADOOP super group exists"
+  ansible.builtin.group:
+    name: "{{ hadoop_group }}"
+    state: present
+  when: hadoop_user_create
+
+- name: "BASE INSTALL| Ensure HADOOP super user"
+  ansible.builtin.user:
+    name: "{{ hadoop_user }}"
+    group: "{{ hadoop_group }}"
+  when: hadoop_user_create
+
+- name: "USERS and GROUPS| Ensure HDFS group"
+  ansible.builtin.group:
+    name: "{{ hdfs_group }}"
+    state: present
+  when: hdfs_user_create
+
+- name: "BASE INSTALL| Ensure HDFS user"
+  ansible.builtin.user:
+    name: "{{ hdfs_user }}"
+    group: "{{ hdfs_group }}"
+    groups: "{{ hadoop_group }}"
+    append: true
+  when: hdfs_user_create
+
+- name: "USERS and GROUPS| Ensure YARN group"
+  ansible.builtin.group:
+    name: "{{ yarn_group }}"
+    state: present
+  when: yarn_user_create
+
+- name: "BASE INSTALL| Ensure YARN user"
+  ansible.builtin.user:
+    name: "{{ yarn_user }}"
+    group: "{{ yarn_group }}"
+    groups: "{{ hadoop_group }}"
+    append: true
+  when: yarn_user_create

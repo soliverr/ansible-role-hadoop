@@ -1,0 +1,18 @@
+---
+# Common installation procedure
+- name: "HADOOP INSTALL| Install Hadoop distribution"
+  import_role: 
+    name: soliverr.bigdata.install
+  vars:
+    bigdata_system_dependencies: "{{ hadoop_system_dependencies }}"
+    bigdata_install_dir: "{{ hadoop_install_dir }}"
+    bigdata_url: "{{ hadoop_url }}"
+
+# Hadoop depended installation
+- name: "HADOOP INSTALL| Create auxiliary path"
+  ansible.builtin.file:
+    path: "{{ hadoop_aux_dir }}"
+    state: directory
+    mode: "{{ (hadoop_user_create) | ternary('0775', '0755') }}"
+    owner: "{{ (hadoop_user_create) | ternary(hadoop_user, 'root') }}"
+    group: "{{ (hadoop_user_create) | ternary(hadoop_group, 'root') }}"

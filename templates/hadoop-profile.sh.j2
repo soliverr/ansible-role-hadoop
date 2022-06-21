@@ -1,0 +1,7 @@
+{{ ansible_managed|comment }}
+
+# Source HADOOP environment
+. {{ hadoop_etc_base_dir }}/conf/hadoop-env.sh
+
+# Set up system PATH
+[[ "$PATH" =~ (^|:)"$HADOOP_HOME/bin"(|/)(:|$) ]] || PATH=$HADOOP_HOME/bin:$PATH

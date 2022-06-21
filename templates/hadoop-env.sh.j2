@@ -1,0 +1,11 @@
+{{ ansible_managed|comment }}
+
+# Set up Environment for Systemd
+{% for entry in (hadoop_properties['hdfs-env'] | dict2items)  %}
+{{ entry.key }}={{ entry.value }}
+{% endfor %}
+
+# Export Environment for Shell
+{% for entry in (hadoop_properties['hdfs-env'] | dict2items)  %}
+export {{ entry.key }}
+{% endfor %}
