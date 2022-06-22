@@ -6,6 +6,7 @@
   tags:
     - hadoop
     - hadoop_install
+    - hadoop_users
 
 - name: "HADOOP| Install base distribution"
   import_tasks: install.yml
