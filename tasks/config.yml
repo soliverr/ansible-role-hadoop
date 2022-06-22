@@ -22,4 +22,4 @@
     bigdata_service_set_default: "{{ _hadoop_service_set_default }}"
     bigdata_env_template: 'hadoop-env.sh.j2'
     bigdata_env_name: "{{ hadoop_env_name }}"
-
+    bigdata_task_suffix: "HADOOP"

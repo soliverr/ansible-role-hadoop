@@ -7,6 +7,9 @@
     bigdata_system_dependencies: "{{ hadoop_system_dependencies }}"
     bigdata_install_dir: "{{ hadoop_install_dir }}"
     bigdata_url: "{{ hadoop_url }}"
+    bigdata_owner: "root"
+    bigdata_group: "root"
+    bigdata_task_suffix: "HADOOP"
 
 # Hadoop depended installation
 - name: "HADOOP INSTALL| Create auxiliary path"
